@@ -1,7 +1,74 @@
+import json
+
+ZMAGA, PORAZ, REMI, NEODLOCENO = "W", "L", "D", "-"
+
+class Uporabnik:
+    def __init__(self, uporabnisko_ime, geslo, igra=None):
+        self.uporabnisko_ime = uporabnisko_ime
+        self.geslo = geslo
+        self.igra = igra
+
+    def dodaj_novo_igro(self, zacetni_igralec, tezavnost):
+        self.igra = ustvari_novo_igro(zacetni_igralec, tezavnost)
+
+    @staticmethod
+    def prijava(vneseno_uporabnisko_ime, vneseno_geslo):
+        nov_uporabnik = Uporabnik.iz_datoteke(vneseno_uporabnisko_ime)
+        if nov_uporabnik is None:
+            raise ValueError("Uporabnisko ime ne obstaja")
+        elif nov_uporabnik.geslo == vneseno_geslo:
+            return nov_uporabnik
+        else:
+            raise ValueError("Geslo je napačno")
+
+    @staticmethod
+    def registracija(vneseno_uporabnisko_ime, vneseno_geslo):
+        if Uporabnik.iz_datoteke(vneseno_uporabnisko_ime) is not None:
+            return ValueError("Uporabnisko ime že obstaja")
+        else:
+            nov_uporabnik = Uporabnik(vneseno_uporabnisko_ime, vneseno_geslo)
+            nov_uporabnik.v_datoteko()
+            return nov_uporabnik
+            
+    def v_slovar(self):
+        if self.igra:
+            return {"uporabnisko_ime": self.uporabnisko_ime, "geslo": self.geslo, "igra": self.igra.v_slovar()}
+        else:
+            return {"uporabnisko_ime": self.uporabnisko_ime, "geslo": self.geslo, "igra": {}}
+
+    def v_datoteko(self):
+        with open(Uporabnik.ime_uporabnikove_datoteke(self.uporabnisko_ime), "w", encoding="utf-8") as datoteka:
+            json.dump(self.v_slovar(), datoteka, ensure_ascii=False)
+
+    @staticmethod
+    def ime_uporabnikove_datoteke(uporabnisko_ime):
+        return f"{uporabnisko_ime}".json
+
+    @staticmethod
+    def iz_slovarja(slovar):
+        uporabnisko_ime = slovar["uporabnisko_ime"]
+        geslo = slovar["geslo"]
+        if slovar["igra"] == {}:
+            igra = None
+        else:
+            igra = Igra.iz_slovarja(slovar["igra"])
+        return Uporabnik(uporabnisko_ime, geslo, igra)
+
+    @staticmethod
+    def iz_datoteke(uporabnisko_ime):
+        try:
+            with open(Uporabnik.ime_uporabnikove_datoteke(uporabnisko_ime)) as datoteka:
+                slovar = json.load(datoteka)
+                return Uporabnik.iz_slovarja(slovar)
+        except FileNotFoundError:
+            return None
+
+
 class Igra:
     def __init__(self, igralec, tezavnost):
         self.plosca = [[0 for j in range(7)] for i in range(6)]     #Vrne matriko (gnezden seznam) igralne plosce
         self.igralec = igralec                                      #Dogovor: 1 = clovek, 2 = racunalnik
+        self.zacetni_igralec = igralec
         self.tezavnost = tezavnost                                  #1 = lahko, 2 = srednje, 3 = tezko. Od tezavnosti bo odvisna globina funkcije, ki isce poteze za racunalnik.
 
     def prost_stolpec(self, stolpec):                               #Metoda, ki vrne True, če je stolpec prost, sicer pa False
@@ -40,6 +107,17 @@ class Igra:
                     return self.plosca[i][j]
 
         return 0
+
+    def stanje(self):
+        potek = self.konec()
+        if potek == 1:
+            return ZMAGA
+        elif potek == 2:
+            return PORAZ
+        elif potek == 0 and self.stevilo_nicel() == 0:
+            return REMI
+        else:
+            return NEODLOCENO
 
     def stiri_v_vrsti(self, i, j, v_i, v_j):                        #Sprejme koordinate točke na igralni plosci in smer vektorja, v katerem pogleda za 4 v vrsto (na primer [0, 1] v desno, [1, 0] navzdol ipd.) 
         return self.plosca[i][j] != 0 and self.plosca[i][j] == self.plosca[i + v_i][j + v_j] == self.plosca[i + 2 * v_i][j +  2 * v_j] == self.plosca[i + 3 * v_i][j +  3 * v_j]
@@ -95,11 +173,11 @@ class Igra:
         return rezultat
     
     def evaluacija(self):
-        if self.konec() == 2:
+        if self.stanje() == PORAZ:
             return float('inf')
-        elif self.konec() == 1:
+        elif self.stanje() == ZMAGA:
             return float('-inf')
-        elif self.konec() == 0 and self.stevilo_nicel() == 0:
+        elif self.stanje() == REMI:
             return 0
         else:
             return self.stevilo_moznih_4_v_vrsto(2) - self.stevilo_moznih_4_v_vrsto(1)
@@ -110,7 +188,7 @@ class Igra:
 
 
     def minimax(self, globina=7):                                               
-        if globina == 0 or self.stevilo_nicel() == 0 or self.konec() != 0:   #Zaustavitveni pogoj.     
+        if globina == 0 or self.stanje() != NEODLOCENO:   #Zaustavitveni pogoj.     
             return [self.evaluacija(), 0]           #funkcija vrne par vrednosti in poteze. ker nas zanima le prva poteza, lahko v zadnjem koraku podamo poljubno vrednost
         if self.igralec == 2:                       #maximizingPlayer
             vrednost = float('-inf')
@@ -149,6 +227,19 @@ class Igra:
     def racunalnik(self):                                  #Tukaj upoštevamo še atribut tezavnost.
         if self.igralec == 2 and self.stevilo_nicel != 0:
             self.naredi_potezo(self.minimax(2 * self.tezavnost)[1])
+
+    def v_slovar(self):
+        return {"plosca": self.plosca, "igralec": self.igralec, "zacetni igralec": self.zacetni_igralec, "tezavnost": self.tezavnost, "zadnja poteza": self.zadnja_poteza}
+
+    @classmethod
+    def iz_slovarja(cls, slovar_s_stanjem):
+        zacetni_igralec = slovar_s_stanjem["zacetni igralec"]
+        tezavnost = slovar_s_stanjem["tezavnost"]
+        igra = Igra(zacetni_igralec, tezavnost)
+        igra.plosca = slovar_s_stanjem["plosca"]
+        igra.igralec = slovar_s_stanjem["igralec"]
+        igra.zadnja_poteza = slovar_s_stanjem["zadnja poteza"]
+        return igra
 
 def ustvari_novo_igro(zacetni_igralec, tezavnost):      #Navadna funkcija, ki ustvari novo igro.
     return Igra(zacetni_igralec, tezavnost)
