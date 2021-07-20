@@ -27,8 +27,8 @@ def registracija_get():
 
 @bottle.post("/registracija/")
 def registracija_post():
-    uporabnisko_ime = bottle.request.forms.getunicode("uporabnisko_ime")
-    geslo = bottle.request.forms.getunicode("geslo")
+    uporabnisko_ime = bottle.request.forms.getunicode("uporabnisko_ime_reg")
+    geslo = bottle.request.forms.getunicode("geslo_reg")
     if not uporabnisko_ime:
         return bottle.template("registracija.html", napaka="Vnesi uporabniško ime!")
     try:
@@ -69,7 +69,7 @@ def nastavitev_igre():
 @bottle.post("/nastavitev_igre/")
 def izbira_parametrov():
     uporabnik = trenutni_uporabnik()
-    zacetni_igralec = int(bottle.request.forms["zacetni igralec"])
+    zacetni_igralec = int(bottle.request.forms["zacetni_igralec"])
     tezavnost = int(bottle.request.forms["tezavnost"])
     uporabnik.dodaj_novo_igro(zacetni_igralec, tezavnost)
     shrani_stanje(uporabnik)
@@ -78,7 +78,10 @@ def izbira_parametrov():
 @bottle.get("/igra/")
 def prikaz_igre():
     uporabnik = trenutni_uporabnik()
-    return bottle.template("igra.html")#########################
+    if uporabnik.igra is None:
+        bottle.redirect("/nastavitev_igre/")
+    else:
+        return bottle.template("igra.html", igra = uporabnik.igra)#########################
 
 @bottle.post("/naredi_potezo/")
 def spusti_zeton():
@@ -99,6 +102,12 @@ def racunalnikova_poteza():
 def zacni_novo_igro():
     uporabnik = trenutni_uporabnik()
     bottle.redirect("/nastavitev_igre/")
+
+@bottle.get('/img/<picture>')
+def slika(picture):
+    return bottle.static_file(picture, root="img")
+
+bottle.run(debug=True, reloader=True)
 
 
     

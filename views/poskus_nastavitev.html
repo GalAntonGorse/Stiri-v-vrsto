@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>Igra štiri v vrsto</title>
+  </head>
+  <body>
+    <form action="/nastavitev_igre/" method="POST" style="margin: auto; width: 500px">
+        <div class="input-group">
+            <select class="form-select" name="zacetni_igralec" aria-label="Default select example">
+                <option selected>Izberi zacetno potezo</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+            </select>
+            <select class="form-select" name="tezavnost" aria-label="Default select example">
+                <option selected>Izberi tezavnost</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+            <span class="input-group-btn">
+                <button type="submit" class="btn btn-primary">Naredi</button>
+            </span>
+        </div>  
+    </form>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  </body>
+</html>
+
+
+
+

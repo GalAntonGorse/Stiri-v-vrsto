@@ -42,7 +42,7 @@ class Uporabnik:
 
     @staticmethod
     def ime_uporabnikove_datoteke(uporabnisko_ime):
-        return f"{uporabnisko_ime}".json
+        return f"{uporabnisko_ime}.json"
 
     @staticmethod
     def iz_slovarja(slovar):
@@ -229,7 +229,7 @@ class Igra:
             self.naredi_potezo(self.minimax(2 * self.tezavnost)[1])
 
     def v_slovar(self):
-        return {"plosca": self.plosca, "igralec": self.igralec, "zacetni igralec": self.zacetni_igralec, "tezavnost": self.tezavnost, "zadnja poteza": self.zadnja_poteza}
+        return {"plosca": self.plosca, "igralec": self.igralec, "zacetni igralec": self.zacetni_igralec, "tezavnost": self.tezavnost}
 
     @classmethod
     def iz_slovarja(cls, slovar_s_stanjem):
@@ -238,7 +238,6 @@ class Igra:
         igra = Igra(zacetni_igralec, tezavnost)
         igra.plosca = slovar_s_stanjem["plosca"]
         igra.igralec = slovar_s_stanjem["igralec"]
-        igra.zadnja_poteza = slovar_s_stanjem["zadnja poteza"]
         return igra
 
 def ustvari_novo_igro(zacetni_igralec, tezavnost):      #Navadna funkcija, ki ustvari novo igro.
