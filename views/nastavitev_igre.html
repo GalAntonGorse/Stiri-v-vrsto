@@ -11,21 +11,68 @@
     <title>Igra štiri v vrsto</title>
   </head>
   <body>
-    <form action="/nastavitev_igre/" method="POST" style="margin: auto; width: 500px">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+          <a class="navbar-brand" href="#">Štiri v vrsto</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                  
+              </ul>
+              <ul class="navbar-nav">
+                  % if defined('uporabnik'):
+                  <li class="nav-item">
+                      <form action="/nastavitev_igre/">
+                          <button class="btn btn-primary me-3">Nova igra</button>
+                      </form>
+                  </li>
+                  <li class="nav-item">
+                      <form action="/odjava/" method="POST">
+                          <button class="btn btn-primary me-3">Odjava</button>
+                      </form>
+                  </li>
+                  % else:
+                  <li class="nav-item">
+                      <form action="/registracija/">
+                          <button class="btn btn-primary me-3">Registracija</button>
+                      </form>
+                  </li>
+                  <li class="nav-item">
+                      <form action="/prijava/">
+                          <button class="btn btn-primary me-3">Prijava</button>
+                      </form>
+                  </li>
+                  % end
+                  <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Menu </a>
+                      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                          <li><a class="dropdown-item" href="#">Domov</a></li>
+                          <li><a class="dropdown-item" href="#">Github</a></li>
+                      </ul>
+                  </li>
+              </ul>
+          </div>
+      </div>
+    </nav>
+    <h2 class="text-center mt-5">Nova igra</h2>
+    <form class="mt-5" action="/nastavitev_igre/" method="POST" style="margin: auto; width: 500px">
         <div class="input-group">
             <select class="form-select" name="zacetni_igralec" aria-label="Default select example">
-                <option selected>Izberi zacetno potezo</option>
+                <option selected>Izberi začetno potezo</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
             </select>
             <select class="form-select" name="tezavnost" aria-label="Default select example">
-                <option selected>Izberi tezavnost</option>
+                <option selected>Izberi težavnost</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
             </select>
             <span class="input-group-btn">
-                <button type="submit" class="btn btn-primary">Naredi</button>
+                <button type="submit" class="btn btn-primary">Igraj</button>
             </span>
         </div>  
     </form>

@@ -15,7 +15,7 @@ class Uporabnik:
     def prijava(vneseno_uporabnisko_ime, vneseno_geslo):
         nov_uporabnik = Uporabnik.iz_datoteke(vneseno_uporabnisko_ime)
         if nov_uporabnik is None:
-            raise ValueError("Uporabnisko ime ne obstaja")
+            raise ValueError("Uporabniško ime ne obstaja")
         elif nov_uporabnik.geslo == vneseno_geslo:
             return nov_uporabnik
         else:
@@ -24,7 +24,7 @@ class Uporabnik:
     @staticmethod
     def registracija(vneseno_uporabnisko_ime, vneseno_geslo):
         if Uporabnik.iz_datoteke(vneseno_uporabnisko_ime) is not None:
-            return ValueError("Uporabnisko ime že obstaja")
+            return ValueError("Uporabniško ime že obstaja")
         else:
             nov_uporabnik = Uporabnik(vneseno_uporabnisko_ime, vneseno_geslo)
             nov_uporabnik.v_datoteko()

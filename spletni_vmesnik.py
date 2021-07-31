@@ -63,8 +63,8 @@ def odjava():
 
 @bottle.get("/nastavitev_igre/")
 def nastavitev_igre():
-    trenutni_uporabnik()
-    return bottle.template("nastavitev_igre.html")###############
+    uporabnik = trenutni_uporabnik()
+    return bottle.template("nastavitev_igre.html", uporabnik=uporabnik)###############
 
 @bottle.post("/nastavitev_igre/")
 def izbira_parametrov():
@@ -81,12 +81,12 @@ def prikaz_igre():
     if uporabnik.igra is None:
         bottle.redirect("/nastavitev_igre/")
     else:
-        return bottle.template("igra.html", igra = uporabnik.igra)#########################
+        return bottle.template("igra.html", igra = uporabnik.igra, uporabnik=uporabnik)#########################
 
 @bottle.post("/naredi_potezo/")
 def spusti_zeton():
     uporabnik = trenutni_uporabnik()
-    stolpec = int(bottle.request.forms["stolpec"])
+    stolpec = int(float(bottle.request.forms["stolpec"]))#valueerror za stolpec 0?
     uporabnik.igra.naredi_potezo(stolpec)
     shrani_stanje(uporabnik)
     bottle.redirect("/")
