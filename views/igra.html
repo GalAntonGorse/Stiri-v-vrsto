@@ -14,18 +14,22 @@
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
-          <a class="navbar-brand" href="#">Štiri v vrsto</a>
+          <a class="navbar-brand" href="/">Štiri v vrsto</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
               <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                  
+                % if defined('uporabnik'):
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="/analiza/">{{uporabnik}}</a>
+                </li>
+                % end
               </ul>
               <ul class="navbar-nav">
                   % if defined('uporabnik'):
                   <li class="nav-item">
-                      <form action="/nastavitev_igre/">
+                      <form action="/zacni_na_novo/" method="POST">
                           <button class="btn btn-primary me-3">Nova igra</button>
                       </form>
                   </li>
@@ -47,10 +51,10 @@
                   </li>
                   % end
                   <li class="nav-item dropdown">
-                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Menu </a>
+                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Meni </a>
                       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                          <li><a class="dropdown-item" href="#">Domov</a></li>
-                          <li><a class="dropdown-item" href="#">Github</a></li>
+                          <li><a class="dropdown-item" href="/">Domov</a></li>
+                          <li><a class="dropdown-item" href="https://github.com/GalAntonGorse/Stiri-v-vrsto">Github</a></li>
                       </ul>
                   </li>
               </ul>
@@ -58,9 +62,9 @@
       </div>
     </nav>
 
-    <h2 class="text-center mt-5">Igra proti računalniku</h2>
+    <h3 class="text-center mt-5">{{uporabnik}} {{uporabnik.skupni_rezultat()["igralec"]}} : {{uporabnik.skupni_rezultat()["racunalnik"]}} Računalnik</h3>
 
-    <table class="mt-5" style="margin: 100px; margin-left: auto; margin-right: auto;" cellspacing="0" cellpadding="0">
+    <table class="mt-5" style="margin: auto" cellspacing="0" cellpadding="0">
       <tr>
         <td id="p00">
           <img style="display:block;" width="100%" height="100%" src="/img/{{ igra.plosca[0][0] }}.jpg">
@@ -202,57 +206,68 @@
     </table> 
     
     % if igra.igralec == 1 and igra.stanje() == NEODLOCENO:
-    <form action="/naredi_potezo/" method="POST" style="margin: auto; width: 500px">
-      <div class="input-group">
-        <select class="form-select" name="stolpec" aria-label="Default select example">
-          <option selected>Izberi stolpec za potezo</option>
-          % if igra.prost_stolpec(0): 
-          <option value="0">1</option>
-          % end
-          % if igra.prost_stolpec(1): 
-          <option value="1">2</option>
-          % end
-          % if igra.prost_stolpec(2): 
-          <option value="2">3</option>
-          %end
-          % if igra.prost_stolpec(3):
-          <option value="3">4</option>
-          % end
-          % if igra.prost_stolpec(4):
-          <option value="4">5</option>
-          % end
-          % if igra.prost_stolpec(5):
-          <option value="5">6</option>
-          % end
-          % if igra.prost_stolpec(6):
-          <option value="6">7</option>
-          %end
-        </select>
-        <span class="input-group-btn">
-          <button type="submit" class="btn btn-primary">Naredi</button>
-        </span>
-      </div>  
-    </form>
+    <div class="d-flex mt-5 flex-column justify-content-center align-items-center">
+      <form action="/naredi_potezo/" method="POST" style="width: 500px">
+        <div class="input-group">
+          <select class="form-select" name="stolpec" aria-label="Default select example" required>
+            <option selected>Izberi stolpec za potezo</option>
+            % if igra.prost_stolpec(0): 
+            <option value="0">1</option>
+            % end
+            % if igra.prost_stolpec(1): 
+            <option value="1">2</option>
+            % end
+            % if igra.prost_stolpec(2): 
+            <option value="2">3</option>
+            %end
+            % if igra.prost_stolpec(3):
+            <option value="3">4</option>
+            % end
+            % if igra.prost_stolpec(4):
+            <option value="4">5</option>
+            % end
+            % if igra.prost_stolpec(5):
+            <option value="5">6</option>
+            % end
+            % if igra.prost_stolpec(6):
+            <option value="6">7</option>
+            %end
+          </select>
+          <span class="input-group-btn">
+            <button type="submit" class="btn btn-primary">Naredi</button>
+          </span>
+        </div> 
+      </form>
+    </div>
+
     % elif igra.igralec == 2 and igra.stanje() == NEODLOCENO:
-    <form action="/racunalnik/" method="POST" style="margin: auto; width: 500px">
-      <button type="submit" class="btn btn-primary" style="width: 500px" name="racunalnik">Računalnikova poteza</button>
-    </form>
+    <div class="d-flex mt-5 flex-column justify-content-center align-items-center">
+      <form action="/racunalnik/" method="POST" style="margin: auto; width: 500px">
+        <button type="submit" class="btn btn-primary w-100" name="racunalnik">Računalnikova poteza</button>
+      </form>
+    </div>
     % elif igra.stanje() == REMI:
-    <p style="margin: auto; width: 500px" class="text-center font-weight-bold">
-      Čestitam, remiziral si z računalnikom. Še ena igra?
-    </p>
+    <div class="d-flex mt-5 flex-column justify-content-center align-items-center">
+      <form action="/zacni_na_novo/" method="POST">
+        <span class="text-center me-3">Čestitam, remiziral si z računalnikom. Še ena igra?</span>
+        <button type="submit" class="btn btn-primary">Nova igra</button>
+      </form>
+    </div>
     % elif igra.stanje() == PORAZ:
-    <p style="margin: auto; width: 500px" class="text-center font-weight-bold">
-      Žal si izgubil proti računalniku. Še ena igra?
-    </p>
+    <div class="d-flex mt-5 flex-column justify-content-center align-items-center">
+      <form action="/zacni_na_novo/" method="POST">
+        <span class="text-center me-3">Žal si izgubil proti računalniku. Še ena igra?</span>
+        <button type="submit" class="btn btn-primary">Nova igra</button>
+      </form>
+    </div>
     % else:
-    <p style="margin: auto; width: 500px" class="text-center font-weight-bold">
-      Čestitam, zmagal si proti računalniku! Še ena igra?
-    </p>
+    <div class="d-flex mt-5 flex-column justify-content-center align-items-center">
+      <form action="/zacni_na_novo/" method="POST">
+        <span class="text-center me-3">Čestitam, zmagal si proti računalniku! Še ena igra?</span>
+        <button type="submit" class="btn btn-primary">Nova igra</button>
+      </form>
+    </div>
     % end
-    <form action="/zacni_na_novo/" method="POST" style="margin: auto; width: 500px; margin-top: 10px">
-      <button type="submit" class="btn btn-primary" style="width: 500px">Nova igra</button>
-    </form>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
   </body>
 </html>

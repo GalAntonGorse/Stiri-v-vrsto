@@ -14,13 +14,17 @@
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
-          <a class="navbar-brand" href="#">Štiri v vrsto</a>
+          <a class="navbar-brand" href="/">Štiri v vrsto</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
               <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                  
+                % if defined('uporabnik'):
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="/analiza/">{{uporabnik}}</a>
+                </li>
+                % end
               </ul>
               <ul class="navbar-nav">
                   % if defined('uporabnik'):
@@ -47,10 +51,10 @@
                   </li>
                   % end
                   <li class="nav-item dropdown">
-                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Menu </a>
+                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Meni </a>
                       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                          <li><a class="dropdown-item" href="#">Domov</a></li>
-                          <li><a class="dropdown-item" href="#">Github</a></li>
+                          <li><a class="dropdown-item" href="/">Domov</a></li>
+                          <li><a class="dropdown-item" href="https://github.com/GalAntonGorse/Stiri-v-vrsto">Github</a></li>
                       </ul>
                   </li>
               </ul>
@@ -58,7 +62,8 @@
       </div>
     </nav>
     <h2 class="text-center mt-5">Nova igra</h2>
-    <form class="mt-5" action="/nastavitev_igre/" method="POST" style="margin: auto; width: 500px">
+    <div class="d-flex mt-5 flex-column justify-content-center align-items-center">
+      <form action="/nastavitev_igre/" method="POST" style="width: 500px">
         <div class="input-group">
             <select class="form-select" name="zacetni_igralec" aria-label="Default select example">
                 <option selected>Izberi začetno potezo</option>
@@ -74,8 +79,15 @@
             <span class="input-group-btn">
                 <button type="submit" class="btn btn-primary">Igraj</button>
             </span>
-        </div>  
-    </form>
+        </div> 
+            % if napaka:
+                <span class="help-block">
+                    <strong>{{ napaka }}</strong>
+                </span>
+            % end         
+      </form>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
   </body>
 </html>

@@ -1,5 +1,5 @@
 import bottle
-from model import Uporabnik
+from model import Uporabnik, ZMAGA, PORAZ, NEODLOCENO
 
 PISKOTEK_UPORABNISKO_IME = "uporabnisko_ime"
 SKRIVNOST = "krneki"
@@ -48,7 +48,7 @@ def prijava_post():
     uporabnisko_ime = bottle.request.forms.getunicode("uporabnisko_ime")
     geslo = bottle.request.forms.getunicode("geslo")
     if not uporabnisko_ime:
-        return bottle.template("registracija.html", napaka="Vnesi uporabniško ime!")
+        return bottle.template("prijava.html", napaka="Vnesi uporabniško ime!")
     try:
         Uporabnik.prijava(uporabnisko_ime, geslo)
         bottle.response.set_cookie(PISKOTEK_UPORABNISKO_IME, uporabnisko_ime, path="/", secret=SKRIVNOST)
@@ -64,11 +64,13 @@ def odjava():
 @bottle.get("/nastavitev_igre/")
 def nastavitev_igre():
     uporabnik = trenutni_uporabnik()
-    return bottle.template("nastavitev_igre.html", uporabnik=uporabnik)###############
+    return bottle.template("nastavitev_igre.html", uporabnik=uporabnik, napaka=None)###############
 
 @bottle.post("/nastavitev_igre/")
 def izbira_parametrov():
     uporabnik = trenutni_uporabnik()
+    if bottle.request.forms.getunicode("zacetni_igralec") == "Izberi začetno potezo" or bottle.request.forms.getunicode("tezavnost") == "Izberi težavnost":
+        return bottle.template("nastavitev_igre.html", uporabnik=uporabnik, napaka="Prazna polja!")
     zacetni_igralec = int(bottle.request.forms["zacetni_igralec"])
     tezavnost = int(bottle.request.forms["tezavnost"])
     uporabnik.dodaj_novo_igro(zacetni_igralec, tezavnost)
@@ -86,8 +88,11 @@ def prikaz_igre():
 @bottle.post("/naredi_potezo/")
 def spusti_zeton():
     uporabnik = trenutni_uporabnik()
-    stolpec = int(float(bottle.request.forms["stolpec"]))#valueerror za stolpec 0?
-    uporabnik.igra.naredi_potezo(stolpec)
+    if bottle.request.forms.getunicode("stolpec") == "Izberi stolpec za potezo":
+        return bottle.template("igra.html", igra = uporabnik.igra, uporabnik=uporabnik)
+    else:
+        stolpec = int(float(bottle.request.forms["stolpec"]))#valueerror za stolpec 0?
+        uporabnik.igra.naredi_potezo(stolpec)
     shrani_stanje(uporabnik)
     bottle.redirect("/")
 
@@ -101,7 +106,16 @@ def racunalnikova_poteza():
 @bottle.post("/zacni_na_novo/")
 def zacni_novo_igro():
     uporabnik = trenutni_uporabnik()
+    if uporabnik.igra.stanje() == NEODLOCENO:
+        uporabnik.zgodovina[PORAZ] = uporabnik.zgodovina.get(PORAZ, 0) + 1
+    uporabnik.zabelezi_odigrano_igro()
+    shrani_stanje(uporabnik)
     bottle.redirect("/nastavitev_igre/")
+
+@bottle.get("/analiza/")
+def prikazi_uporabnika():
+    uporabnik = trenutni_uporabnik()
+    return bottle.template("analiza.html", uporabnik=uporabnik)
 
 @bottle.get('/img/<picture>')
 def slika(picture):

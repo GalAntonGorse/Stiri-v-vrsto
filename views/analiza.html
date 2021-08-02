@@ -1,3 +1,4 @@
+%ZMAGA, PORAZ, REMI, NEODLOCENO = "W", "L", "D", "-"
 <!doctype html>
 <html lang="en">
   <head>
@@ -23,12 +24,12 @@
                 <li class="nav-item">
                   <a class="nav-link active" aria-current="page" href="/analiza/">{{uporabnik}}</a>
                 </li>
-                % end
+                % end 
               </ul>
               <ul class="navbar-nav">
                   % if defined('uporabnik'):
                   <li class="nav-item">
-                      <form action="/zacni_na_novo/">
+                      <form action="/zacni_na_novo/" method="POST">
                           <button class="btn btn-primary me-3">Nova igra</button>
                       </form>
                   </li>
@@ -61,30 +62,43 @@
       </div>
     </nav>
 
-    <h2 class="text-center mt-5">Prijava</h2>
-        
-    <div class="d-flex mt-5 flex-column justify-content-center align-items-center">
-        <form style="width: 500px" action="/prijava/" method="POST">
-            <div class="form-group">
-                <label for="upor_ime_prijava">Uporabniško ime</label>
-                <input type="text" class="form-control" id="upor_ime_prijava" placeholder="Uporabniško ime" name="uporabnisko_ime">
-                % if napaka:
-                <span class="help-block">
-                    <strong>{{ napaka }}</strong>
-                </span>
-                % end
-            </div>
-            <div class="form-group">
-                <label for="geslo_prijava">Geslo</label>
-                <input type="password" class="form-control" id="geslo_prijava" placeholder="Geslo" name="geslo">
-            </div>
-            <button type="submit" class="btn btn-primary" style="margin-top: 10px">Naprej</button>
-        </form>
-    </div>
+    <h3 class="text-center mt-5">Statistika odigranih iger</h3>
 
-        
-    
-        
+    <table class="table table-hover mt-5" style="width: 700px; margin: auto;">
+        <thead>
+            <tr>
+            <th scope="col">Izid igre</th>
+            <th scope="col">Število iger</th>
+            <th scope="col">Odstotek</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+            <th scope="row">Zmaga</th>
+            <td>{{uporabnik.zgodovina.get(ZMAGA, 0)}}</td>
+            <td>{{uporabnik.procenti().get(ZMAGA)}}</td>
+            </tr>
+
+            <tr>
+            <th scope="row">Remi</th>
+            <td>{{uporabnik.zgodovina.get(REMI, 0)}}</td>
+            <td>{{uporabnik.procenti().get(REMI)}}</td>
+            </tr>
+
+            <tr>
+            <th scope="row">Poraz</th>
+            <td>{{uporabnik.zgodovina.get(PORAZ, 0)}}</td>
+            <td>{{uporabnik.procenti().get(PORAZ)}}</td>
+            </tr>
+
+            <tr>
+            <th scope="row">Skupaj</th>
+            <td>{{uporabnik.zgodovina.get(PORAZ, 0) + uporabnik.zgodovina.get(REMI, 0) + uporabnik.zgodovina.get(ZMAGA, 0)}}</td>
+            <td>100.0%</td>
+            </tr>
+        </tbody>
+    </table>
+
 
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>

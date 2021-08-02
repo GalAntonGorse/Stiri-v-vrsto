@@ -3,10 +3,17 @@ import json
 ZMAGA, PORAZ, REMI, NEODLOCENO = "W", "L", "D", "-"
 
 class Uporabnik:
-    def __init__(self, uporabnisko_ime, geslo, igra=None):
+    def __init__(self, uporabnisko_ime, geslo, igra=None, zgodovina=None):
         self.uporabnisko_ime = uporabnisko_ime
         self.geslo = geslo
         self.igra = igra
+        if zgodovina:
+            self.zgodovina = zgodovina
+        else:
+            self.zgodovina = {}
+        
+    def __repr__(self):
+        return f"{self.uporabnisko_ime}"
 
     def dodaj_novo_igro(self, zacetni_igralec, tezavnost):
         self.igra = ustvari_novo_igro(zacetni_igralec, tezavnost)
@@ -24,7 +31,7 @@ class Uporabnik:
     @staticmethod
     def registracija(vneseno_uporabnisko_ime, vneseno_geslo):
         if Uporabnik.iz_datoteke(vneseno_uporabnisko_ime) is not None:
-            return ValueError("Uporabniško ime že obstaja")
+            raise ValueError("Uporabniško ime že obstaja")
         else:
             nov_uporabnik = Uporabnik(vneseno_uporabnisko_ime, vneseno_geslo)
             nov_uporabnik.v_datoteko()
@@ -32,9 +39,9 @@ class Uporabnik:
             
     def v_slovar(self):
         if self.igra:
-            return {"uporabnisko_ime": self.uporabnisko_ime, "geslo": self.geslo, "igra": self.igra.v_slovar()}
+            return {"uporabnisko_ime": self.uporabnisko_ime, "geslo": self.geslo, "igra": self.igra.v_slovar(), "zgodovina": self.zgodovina}
         else:
-            return {"uporabnisko_ime": self.uporabnisko_ime, "geslo": self.geslo, "igra": {}}
+            return {"uporabnisko_ime": self.uporabnisko_ime, "geslo": self.geslo, "igra": {}, "zgodovina": self.zgodovina}
 
     def v_datoteko(self):
         with open(Uporabnik.ime_uporabnikove_datoteke(self.uporabnisko_ime), "w", encoding="utf-8") as datoteka:
@@ -48,11 +55,12 @@ class Uporabnik:
     def iz_slovarja(slovar):
         uporabnisko_ime = slovar["uporabnisko_ime"]
         geslo = slovar["geslo"]
+        zgodovina = slovar["zgodovina"]
         if slovar["igra"] == {}:
             igra = None
         else:
             igra = Igra.iz_slovarja(slovar["igra"])
-        return Uporabnik(uporabnisko_ime, geslo, igra)
+        return Uporabnik(uporabnisko_ime, geslo, igra, zgodovina)
 
     @staticmethod
     def iz_datoteke(uporabnisko_ime):
@@ -63,6 +71,23 @@ class Uporabnik:
         except FileNotFoundError:
             return None
 
+    def zabelezi_odigrano_igro(self):
+        if self.igra and self.igra.stanje() != NEODLOCENO:
+            koncni_rezultat = self.igra.stanje()
+            self.zgodovina[koncni_rezultat] = self.zgodovina.get(koncni_rezultat, 0) + 1
+
+    def skupni_rezultat(self):
+        return {"igralec": round(float(self.zgodovina.get(ZMAGA, 0)) + float(self.zgodovina.get(REMI, 0)) / 2, 1), "racunalnik": round(float(self.zgodovina.get(PORAZ, 0)) + float(self.zgodovina.get(REMI, 0)) / 2, 1)}
+
+    def procenti(self):
+        stevilo_iger = self.zgodovina.get(ZMAGA, 0) + self.zgodovina.get(REMI, 0) + self.zgodovina.get(PORAZ, 0)
+        if stevilo_iger != 0:
+            procent_zmag = f"{round(100 * self.zgodovina.get(ZMAGA, 0) / stevilo_iger, 1)}%"
+            procent_remijev = f"{round(100 * self.zgodovina.get(REMI, 0) / stevilo_iger, 1)}%"
+            procent_porazov = f"{round(100 * self.zgodovina.get(PORAZ, 0) / stevilo_iger, 1)}%"
+        else:
+            procent_zmag = procent_porazov = procent_remijev = "0.0%"
+        return {ZMAGA: procent_zmag, REMI: procent_remijev, PORAZ: procent_porazov}
 
 class Igra:
     def __init__(self, igralec, tezavnost):
@@ -79,12 +104,12 @@ class Igra:
         return False
 
     def naredi_potezo(self, stolpec):                               #Metoda, ki naredi potezo (zapise stevilo igralca na potezi) v določenem stolpcu, spremeni stevilo igralca na potezi in vrne None. 
-        for i in reversed(range(6)):                                #Če stolpec ni prost, potem zgolj vrne None.
-            if self.plosca[i][stolpec] == 0:                        
-                self.plosca[i][stolpec] = self.igralec
-                self.igralec = 3 - self.igralec
-                self.zadnja_poteza = stolpec                        #Atribut zadnja_poteza spremlja zadnjo narejeno potezo
-                break
+            for i in reversed(range(6)):                                #Če stolpec ni prost, potem zgolj vrne None.
+                if self.plosca[i][stolpec] == 0:                        
+                    self.plosca[i][stolpec] = self.igralec
+                    self.igralec = 3 - self.igralec
+                    self.zadnja_poteza = stolpec                        #Atribut zadnja_poteza spremlja zadnjo narejeno potezo
+                    break
 
     def konec(self):                                                #Metoda konec() vrne število igralca, ki je zmagal, sicer pa 0.
         for i in range(3):
